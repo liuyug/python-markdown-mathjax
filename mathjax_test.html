@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <script type="text/javascript" async
+                src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML">
+        </script>
+        <title>MathJax test</title>
+    </head>
+    <body>
+        <h1>TeX or LaTeX test</h1>
+        <h2>inline mode</h2>
+        <p>preprocess: \( E = mc^2 \) .</p>
+        <p>no preprocess: <script type="math/tex">E = mc^2</script>.</p>
+        <h2>display mode</h2>
+        <p>preprocess: $$ E = mc^2 $$.</p>
+        <p>preprocess: \[ E = mc^2 \].</p>
+        <p>no preprocess <script type="math/tex; mode=display">E = mc^2</script>.</p>
+        <h1>AsciiMath test</h1>
+        <p>preprocess ` E = mc^2 `.</p>
+        <p>no preprocess <script type="math/asciimath">E = mc^2</script>.</p>
+        <p>no preprocess <script type="math/asciimath; mode=display">E = mc^2</script>.</p>
+    </body>
+</html>
