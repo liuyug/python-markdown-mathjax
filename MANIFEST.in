@@ -1,5 +1,5 @@
-mathjax_test.html
-mdx_mathjax.py
-README.rst
-setup.py
-test.py
+include mathjax_test.html
+include mdx_mathjax.py
+include README.rst
+include setup.py
+include test.py
