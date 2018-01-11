@@ -1,6 +1,9 @@
 =====================================
 MarkJax extension for Python-Markdown
 =====================================
+.. note::
+
+    "\" is a escape character and use "\\" to show "\".
 
 TeX or LaTeX
 ============
