@@ -29,7 +29,10 @@ class MathJaxExtension(Extension):
             if not self.getConfig('add_preview'):
                 return node
             preview = etree.Element('span', {'class': 'MathJax_Preview'})
-            preview.text = AtomicString(_translate_escape(preview_text))
+            if preview_text.startswith('\\`'):
+                preview.text = AtomicString(_translate_escape(preview_text))
+            else:
+                preview.text = AtomicString(preview_text)
             wrapper = etree.Element(wrapper_tag)
             wrapper.extend([preview, node])
             return wrapper
@@ -37,13 +40,19 @@ class MathJaxExtension(Extension):
         def handle_match_inline(m):
             node = etree.Element('script')
             node.set('type', self._get_content_type(m.group(2)))
-            node.text = AtomicString(_translate_escape(m.group(3)))
+            if m.group(2) == '\\`':
+                node.text = AtomicString(_translate_escape(m.group(3)))
+            else:
+                node.text = AtomicString(m.group(3))
             return _wrap_node(node, ''.join(m.group(2, 3, 4)), 'span')
 
         def handle_match(m):
             node = etree.Element('script')
             node.set('type', '%s; mode=display' % self._get_content_type(m.group(2)))
-            node.text = AtomicString(_translate_escape(m.group(3)))
+            if m.group(2) == '\\`':
+                node.text = AtomicString(_translate_escape(m.group(3)))
+            else:
+                node.text = AtomicString(m.group(3))
             return _wrap_node(node, ''.join(m.group(2, 3, 4)), 'div')
 
         inline_patterns = (
