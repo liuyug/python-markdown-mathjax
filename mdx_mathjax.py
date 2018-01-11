@@ -16,7 +16,7 @@ class MathJaxExtension(Extension):
         super(MathJaxExtension, self).__init__(*args, **kwargs)
 
     def _get_content_type(self, delimiter):
-        if delimiter == '\`':
+        if delimiter == '\\`':
             return 'math/asciimath'
         elif delimiter in ['$$', '\\(', '\\[']:
             return 'math/tex'
