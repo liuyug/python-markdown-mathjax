@@ -21,10 +21,15 @@ class MathJaxExtension(Extension):
         }
         super(MathJaxExtension, self).__init__(*args, **kwargs)
 
-    def _html_entites(self, text):
+    def _fix_html_entites(self, text):
         text = text.replace('&', '&amp;')
         text = text.replace('<', '&lt;')
         text = text.replace('>', '&gt;')
+        return text
+
+    def _fix_latex(self, text):
+        text = text.replace('<', '\lt')
+        text = text.replace('>', '\gt')
         return text
 
     def _process_escape(self, text):
@@ -48,33 +53,41 @@ class MathJaxExtension(Extension):
         def handle_match_inline(m):
             node = etree.Element('script')
             node.set('type', self._get_content_type(m.group(2)))
-            text = self._html_entites(m.group(3))
             if m.group(2) in self.asciimath_delimiters:
+                text = self._fix_html_entites(m.group(3))
                 if self.getConfig('asciimath_escape'):
                     node.text = AtomicString(self._process_escape(text))
                 else:
                     node.text = AtomicString(text)
             elif m.group(2) in self.latexmath_delimiters:
+                text = self._fix_latex(m.group(3))
                 if self.getConfig('latexmath_escape'):
                     node.text = AtomicString(self._process_escape(text))
                 else:
                     node.text = AtomicString(text)
+            else:
+                text = m.group(3)
+                node.text = AtomicString(text)
             return _wrap_node(node, m.group(2) + text + m.group(4), 'span')
 
         def handle_match(m):
             node = etree.Element('script')
             node.set('type', '%s; mode=display' % self._get_content_type(m.group(2)))
-            text = self._html_entites(m.group(3))
             if m.group(2) in self.asciimath_delimiters:
+                text = self._fix_html_entites(m.group(3))
                 if self.getConfig('asciimath_escape'):
                     node.text = AtomicString(self._process_escape(text))
                 else:
                     node.text = AtomicString(text)
             elif m.group(2) in self.latexmath_delimiters:
+                text = self._fix_latex(m.group(3))
                 if self.getConfig('latexmath_escape'):
                     node.text = AtomicString(self._process_escape(text))
                 else:
                     node.text = AtomicString(text)
+            else:
+                text = m.group(3)
+                node.text = AtomicString(text)
             return _wrap_node(node, m.group(2) + text + m.group(4), 'div')
 
         inline_patterns = (
