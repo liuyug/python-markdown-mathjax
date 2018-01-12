@@ -10,7 +10,7 @@ with open('README.rst') as f:
 
 setup(
     name='python-markdown-mathjax',
-    version='1.0.2',
+    version='1.0.3',
     author='Yugang LIU',
     author_email='liuyug@gmail.com',
     url='https://github.com/liuyug/python-markdown-mathjax.git',

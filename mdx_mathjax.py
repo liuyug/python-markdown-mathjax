@@ -9,30 +9,38 @@ from markdown.util import AtomicString, etree
 
 
 class MathJaxExtension(Extension):
+    asciimath_delimiters = ('\\`',)
+    latexmath_delimiters = ('$$', '\\(', '\\[')
+    regex_escape = re.compile(r'\\(.)')
+
     def __init__(self, *args, **kwargs):
         self.config = {
             'add_preview': [False, 'Add a preview node before each math node'],
+            'latexmath_escape': [False, 'Process LatexMath Escape "\\"'],
+            'asciimath_escape': [False, 'Process AsciiMath Escape "\\"'],
         }
         super(MathJaxExtension, self).__init__(*args, **kwargs)
 
+    def _html_entites(self, text):
+        text = text.replace('&', '&amp;')
+        text = text.replace('<', '&lt;')
+        text = text.replace('>', '&gt;')
+        return text
+
+    def _process_escape(self, text):
+        return self.regex_escape.sub(r'\1', text)
+
     def _get_content_type(self, delimiter):
-        if delimiter == '\\`':
+        if delimiter in self.asciimath_delimiters:
             return 'math/asciimath'
-        elif delimiter in ['$$', '\\(', '\\[']:
+        elif delimiter in self.latexmath_delimiters:
             return 'math/tex'
 
     def extendMarkdown(self, md, md_globals):
-        def _translate_escape(text):
-            return escape_character.sub(r'\1', text)
-
         def _wrap_node(node, preview_text, wrapper_tag):
             if not self.getConfig('add_preview'):
                 return node
             preview = etree.Element('span', {'class': 'MathJax_Preview'})
-            if preview_text.startswith('\\`'):
-                preview.text = AtomicString(_translate_escape(preview_text))
-            else:
-                preview.text = AtomicString(preview_text)
             wrapper = etree.Element(wrapper_tag)
             wrapper.extend([preview, node])
             return wrapper
@@ -40,20 +48,34 @@ class MathJaxExtension(Extension):
         def handle_match_inline(m):
             node = etree.Element('script')
             node.set('type', self._get_content_type(m.group(2)))
-            if m.group(2) == '\\`':
-                node.text = AtomicString(_translate_escape(m.group(3)))
-            else:
-                node.text = AtomicString(m.group(3))
-            return _wrap_node(node, ''.join(m.group(2, 3, 4)), 'span')
+            text = self._html_entites(m.group(3))
+            if m.group(2) in self.asciimath_delimiters:
+                if self.getConfig('asciimath_escape'):
+                    node.text = AtomicString(self._process_escape(text))
+                else:
+                    node.text = AtomicString(text)
+            elif m.group(2) in self.latexmath_delimiters:
+                if self.getConfig('latexmath_escape'):
+                    node.text = AtomicString(self._process_escape(text))
+                else:
+                    node.text = AtomicString(text)
+            return _wrap_node(node, m.group(2) + text + m.group(4), 'span')
 
         def handle_match(m):
             node = etree.Element('script')
             node.set('type', '%s; mode=display' % self._get_content_type(m.group(2)))
-            if m.group(2) == '\\`':
-                node.text = AtomicString(_translate_escape(m.group(3)))
-            else:
-                node.text = AtomicString(m.group(3))
-            return _wrap_node(node, ''.join(m.group(2, 3, 4)), 'div')
+            text = self._html_entites(m.group(3))
+            if m.group(2) in self.asciimath_delimiters:
+                if self.getConfig('asciimath_escape'):
+                    node.text = AtomicString(self._process_escape(text))
+                else:
+                    node.text = AtomicString(text)
+            elif m.group(2) in self.latexmath_delimiters:
+                if self.getConfig('latexmath_escape'):
+                    node.text = AtomicString(self._process_escape(text))
+                else:
+                    node.text = AtomicString(text)
+            return _wrap_node(node, m.group(2) + text + m.group(4), 'div')
 
         inline_patterns = (
             Pattern(r'(?<!\\)(\\\()(.+?)(\\\))'),     # MathJax   \(...\)
@@ -70,7 +92,6 @@ class MathJaxExtension(Extension):
         for i, pattern in enumerate(inline_patterns):
             pattern.handleMatch = handle_match_inline
             md.inlinePatterns.add('mathjax-inline-%d' % i, pattern, '<escape')
-        escape_character = re.compile(r'\\(.)')
 
 
 def makeExtension(*args, **kwargs):
