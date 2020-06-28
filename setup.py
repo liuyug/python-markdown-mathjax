@@ -18,5 +18,5 @@ setup(
     description='MathJax extension for python-markdown',
     long_description=long_description,
     py_modules=['mdx_mathjax'],
-    install_requires=['Markdown>=2.5'],
+    install_requires=['Markdown>=3.0'],
 )

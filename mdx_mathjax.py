@@ -28,8 +28,8 @@ class MathJaxExtension(Extension):
         return text
 
     def _fix_latex(self, text):
-        text = text.replace('<', '\lt')
-        text = text.replace('>', '\gt')
+        text = text.replace('<', '\\lt')
+        text = text.replace('>', '\\gt')
         return text
 
     def _process_escape(self, text):
